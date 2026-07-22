@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Midnight Neon & Color World Prompt Generator</title>
+  <meta name="description" content="Reference-driven luxury AI image prompt generator." />
+  <style>
+    :root{
+      --bg:#04060f;
+      --bg2:#071a55;
+      --card:rgba(10,14,28,.9);
+      --card2:rgba(11,20,45,.95);
+      --blue:#1450e6;
+      --blue2:#0b2d91;
+      --gold:#d4af37;
+      --gold2:#f2d37a;
+      --white:#ffffff;
+      --soft:#e8eeff;
+      --muted:#a9b8db;
+      --border:rgba(212,175,55,.22);
+      --shadow:0 20px 60px rgba(0,0,0,.38), 0 0 28px rgba(20,80,230,.12);
+      --radius:24px;
+      --radius-sm:16px;
+      --success:#50d09d;
+      --danger:#ff7272;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color:var(--soft);
+      background:
+        radial-gradient(circle at top left, rgba(20,80,230,.35), transparent 28%),
+        radial-gradient(circle at top right, rgba(212,175,55,.12), transparent 20%),
+        linear-gradient(145deg, #02040b 0%, #07163d 50%, #02040b 100%);
+      min-height:100vh;
+      overflow-x:hidden;
+    }
+    body::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      background-image:
+        linear-gradient(rgba(255,255,255,.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.02) 1px, transparent 1px);
+      background-size:40px 40px;
+      mask-image:linear-gradient(to bottom, rgba(0,0,0,.92), transparent 88%);
+      opacity:.4;
+    }
+    .wrap{
+      width:min(1220px, calc(100% - 28px));
+      margin:0 auto;
+      padding:22px 0 50px;
+      position:relative;
+      z-index:1;
+    }
+    .hero{
+      padding:32px clamp(20px, 4vw, 54px);
+      border:1px solid var(--border);
+      border-radius:30px;
+      background:
+        radial-gradient(circle at top right, rgba(212,175,55,.16), transparent 30%),
+        linear-gradient(135deg, rgba(5,9,21,.95), rgba(7,26,85,.94));
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      position:relative;
+    }
+    .hero::after{
+      content:"";
+      position:absolute;
+      width:320px;
+      height:320px;
+      right:-130px;
+      top:-120px;
+      border-radius:50%;
+      background:radial-gradient(circle, rgba(20,80,230,.42), transparent 68%);
+      filter:blur(8px);
+      pointer-events:none;
+    }
+    .eyebrow{
+      margin:0 0 12px;
+      color:var(--gold2);
+      font-size:.78rem;
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:.18em;
+    }
+    h1{
+      margin:0;
+      color:var(--white);
+      font-family:Georgia, "Times New Roman", serif;
+      font-size:clamp(2rem, 5vw, 4.1rem);
+      line-height:1;
+      letter-spacing:-.045em;
+      max-width:900px;
+      text-wrap:balance;
+    }
+    .subtitle{
+      margin:16px 0 0;
+      max-width:760px;
+      color:var(--muted);
+      font-size:clamp(1rem, 2vw, 1.15rem);
+      line-height:1.65;
+    }
+    .button-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:12px;
+      margin-top:26px;
+    }
+    button, select, textarea, input{
+      font:inherit;
+    }
+    .btn{
+      min-height:48px;
+      padding:12px 18px;
+      border:0;
+      border-radius:999px;
+      font-weight:800;
+      cursor:pointer;
+      color:var(--white);
+      transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease;
+    }
+    .btn:hover{transform:translateY(-2px)}
+    .btn:active{transform:translateY(0)}
+    .btn-primary{
+      background:linear-gradient(135deg, var(--blue), var(--blue2));
+      box-shadow:0 10px 28px rgba(20,80,230,.34);
+    }
+    .btn-primary:hover{box-shadow:0 14px 36px rgba(20,80,230,.46)}
+    .btn-gold{
+      color:#171208;
+      background:linear-gradient(135deg, var(--gold2), var(--gold));
+      box-shadow:0 10px 28px rgba(212,175,55,.24);
+    }
+    .btn-gold:hover{box-shadow:0 14px 36px rgba(212,175,55,.35)}
+    .btn-dark{
+      background:rgba(6,10,19,.9);
+      border:1px solid rgba(255,255,255,.1);
+    }
+    .btn-dark:hover{
+      border-color:rgba(212,175,55,.42);
+      box-shadow:0 10px 24px rgba(0,0,0,.28);
+    }
+    .section{
+      margin-top:22px;
+      padding:clamp(20px, 3vw, 30px);
+      border-radius:var(--radius);
+      border:1px solid var(--border);
+      background:linear-gradient(150deg, var(--card), var(--card2));
+      box-shadow:var(--shadow);
+      backdrop-filter:blur(12px);
+    }
+    .section-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:18px;
+      margin-bottom:20px;
+    }
+    .section h2{
+      margin:0;
+      color:var(--white);
+      font-family:Georgia, "Times New Roman", serif;
+      font-size:clamp(1.35rem, 3vw, 2rem);
+    }
+    .copy{
+      margin:7px 0 0;
+      color:var(--muted);
+      line-height:1.6;
+      font-size:.96rem;
+      max-width:760px;
+    }
+    .upload-box{
+      display:grid;
+      grid-template-columns:minmax(0, 1fr) auto;
+      gap:18px;
+      padding:18px;
+      border:1px dashed rgba(242,211,122,.5);
+      border-radius:18px;
+      background:linear-gradient(135deg, rgba(20,80,230,.12), rgba(212,175,55,.08));
+      align-items:center;
+    }
+    .upload-title{
+      margin:0 0 8px;
+      color:var(--gold2);
+      font-weight:900;
+    }
+    .upload-note{
+      margin:0;
+      color:var(--soft);
+      line-height:1.6;
+    }
+    .upload-actions{
+      display:flex;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+      align-items:center;
+      gap:12px;
+    }
+    .file-pill{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:44px;
+      padding:11px 16px;
+      border-radius:999px;
+      font-weight:850;
+      color:#171208;
+      background:linear-gradient(135deg, var(--gold2), var(--gold));
+      cursor:pointer;
+      transition:transform .18s ease, box-shadow .18s ease;
+    }
+    .file-pill:hover{
+      transform:translateY(-2px);
+      box-shadow:0 10px 24px rgba(212,175,55,.25);
+    }
+    #referenceFiles{
+      position:absolute;
+      width:1px;
+      height:1px;
+      overflow:hidden;
+      clip:rect(0,0,0,0);
+      white-space:nowrap;
+    }
+    .file-status{
+      color:var(--muted);
+      font-size:.88rem;
+      max-width:300px;
+      overflow-wrap:anywhere;
+    }
+    .preview-grid{
+      display:none;
+      grid-template-columns:repeat(3, minmax(0, 1fr));
+      gap:12px;
+      margin-top:16px;
+    }
+    .preview-grid.show{display:grid}
+    .preview-grid img{
+      width:100%;
+      aspect-ratio:3 / 4;
+      object-fit:cover;
+      border-radius:14px;
+      border:1px solid rgba(242,211,122,.28);
+      box-shadow:0 12px 30px rgba(0,0,0,.28);
+      background:#0b1020;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(2, minmax(0, 1fr));
+      gap:16px;
+    }
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      min-width:0;
+    }
+    .field.full{
+      grid-column:1 / -1;
+    }
+    label{
+      color:var(--soft);
+      font-size:.9rem;
+      font-weight:800;
+      letter-spacing:.01em;
+    }
+    select, textarea, input[type="text"]{
+      width:100%;
+      color:var(--white);
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:14px;
+      background:rgba(2,6,18,.9);
+      transition:border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.03);
+    }
+    select{
+      min-height:50px;
+      padding:0 44px 0 14px;
+      appearance:none;
+      background-image:
+        linear-gradient(45deg, transparent 50%, var(--gold2) 50%),
+        linear-gradient(135deg, var(--gold2) 50%, transparent 50%);
+      background-position:calc(100% - 20px) 21px, calc(100% - 14px) 21px;
+      background-size:6px 6px, 6px 6px;
+      background-repeat:no-repeat;
+    }
+    select option{
+      background:#08112d;
+      color:#fff;
+    }
+    input[type="text"]{
+      min-height:50px;
+      padding:0 14px;
+    }
+    input[type="text"]::placeholder,
+    textarea::placeholder{
+      color:#7785a8;
+    }
+    textarea{
+      min-height:112px;
+      padding:14px;
+      resize:vertical;
+      line-height:1.55;
+    }
+    select:hover, textarea:hover, input[type="text"]:hover{
+      border-color:rgba(212,175,55,.4);
+    }
+    select:focus-visible, textarea:focus-visible, button:focus-visible, input:focus-visible{
+      outline:3px solid rgba(242,211,122,.34);
+      outline-offset:2px;
+    }
+    select:focus, textarea:focus, input[type="text"]:focus{
+      border-color:var(--gold);
+      box-shadow:0 0 0 3px rgba(212,175,55,.08), 0 0 24px rgba(20,80,230,.12);
+    }
+    .quick-presets{
+      display:grid;
+      grid-template-columns:repeat(4, minmax(0,1fr));
+      gap:12px;
+      margin-bottom:20px;
+    }
+    .preset{
+      padding:16px;
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(255,255,255,.03);
+      cursor:pointer;
+      text-align:left;
+      transition:transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+    }
+    .preset:hover{
+      transform:translateY(-3px);
+      border-color:rgba(212,175,55,.38);
+      box-shadow:0 12px 30px rgba(0,0,0,.22);
+    }
+    .preset strong{
+      display:block;
+      color:var(--gold2);
+      margin-bottom:6px;
+      font-size:.95rem;
+    }
+    .preset span{
+      color:var(--muted);
+      font-size:.84rem;
+      line-height:1.45;
+      display:block;
+    }
+    .output{
+      min-height:360px;
+      background:
+        radial-gradient(circle at top right, rgba(20,80,230,.16), transparent 28%),
+        linear-gradient(145deg, rgba(3,6,18,.97), rgba(6,16,43,.95));
+      border-color:rgba(212,175,55,.3);
+      line-height:1.75;
+      font-size:1rem;
+    }
+    .meta{
+      margin-top:12px;
+      display:flex;
+      flex-wrap:wrap;
+      justify-content:space-between;
+      gap:12px;
+      color:var(--muted);
+      font-size:.85rem;
+    }
+    .status{
+      min-height:1.2em;
+      font-weight:800;
+      color:var(--success);
+    }
+    .tips{
+      margin-top:18px;
+      display:grid;
+      grid-template-columns:repeat(2, minmax(0,1fr));
+      gap:14px;
+    }
+    .tip{
+      padding:16px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(255,255,255,.035);
+    }
+    .tip h3{
+      margin:0 0 8px;
+      color:var(--gold2);
+      font-size:.95rem;
+    }
+    .tip p{
+      margin:0;
+      color:var(--muted);
+      font-size:.88rem;
+      line-height:1.55;
+    }
+    .foot{
+      margin:22px auto 0;
+      max-width:860px;
+      text-align:center;
+      color:rgba(232,238,255,.68);
+      font-size:.82rem;
+      line-height:1.6;
+    }
+    @media (max-width: 950px){
+      .quick-presets{grid-template-columns:repeat(2, minmax(0,1fr))}
+    }
+    @media (max-width: 760px){
+      .wrap{width:min(100% - 18px, 1220px); padding-top:14px}
+      .hero{padding:24px 18px; border-radius:22px}
+      .button-row{display:grid; grid-template-columns:1fr}
+      .btn{width:100%}
+      .upload-box{grid-template-columns:1fr}
+      .upload-actions{justify-content:flex-start}
+      .grid, .tips, .preview-grid, .quick-presets{grid-template-columns:1fr}
+      .section-head{flex-direction:column}
+      .section{padding:18px}
+      .field.full{grid-column:auto}
+    }
+    @media (prefers-reduced-motion: reduce){
+      *, *::before, *::after{
+        transition:none !important;
+        scroll-behavior:auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header class="hero">
+      <p class="eyebrow">Reference-Driven Live Demo Generator</p>
+      <h1>Midnight Neon &amp; Color World Prompt Generator</h1>
+      <p class="subtitle">Build premium AI image prompts in seconds.</p>
+      <div class="button-row" aria-label="Generator actions">
+        <button class="btn btn-primary" id="randomizeBtn" type="button">🎲 Randomize</button>
+        <button class="btn btn-gold" id="copyBtn" type="button">📋 Copy Prompt</button>
+        <button class="btn btn-dark" id="clearBtn" type="button">🗑 Clear</button>
+      </div>
+    </header>
+
+    <section class="section" aria-labelledby="referenceTitle">
+      <div class="section-head">
+        <div>
+          <h2 id="referenceTitle">Upload Reference</h2>
+          <p class="copy">This version is built to follow your reference images way harder. Upload up to 3 images so the prompt can be used for exact visual-language matching.</p>
+        </div>
+      </div>
+
+      <div class="upload-box">
+        <div>
+          <p class="upload-title">Reference Match Reminder</p>
+          <p class="upload-note">Upload the identity photo and any scene/style references. The prompt will tell the AI to preserve the subject’s exact face and body while studying the references for composition, color density, prop placement, environment layering, glam styling, and overall atmosphere.</p>
+          <div class="preview-grid" id="previewGrid"></div>
+        </div>
+
+        <div class="upload-actions">
+          <label class="file-pill" for="referenceFiles">Choose Images</label>
+          <input id="referenceFiles" type="file" accept="image/png,image/jpeg,image/webp" multiple />
+          <span class="file-status" id="fileStatus">No images selected</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="presetTitle">
+      <div class="section-head">
+        <div>
+          <h2 id="presetTitle">Quick Reference Presets</h2>
+          <p class="copy">Use a preset when you want the prompt to hit closer to the vibe of your sample images.</p>
+        </div>
+      </div>
+
+      <div class="quick-presets">
+        <button class="preset" type="button" data-preset="beach">
+          <strong>Color Beach</strong>
+          <span>Paint-by-number beach scene, layered art supplies, colorful sunset backdrop, bright playful luxury.</span>
+        </button>
+
+        <button class="preset" type="button" data-preset="waterfront">
+          <strong>Midnight Waterfront</strong>
+          <span>Black glossy outfit, rainbow accents, neon skyline, reflective pavement, dramatic urban night energy.</span>
+        </button>
+
+        <button class="preset" type="button" data-preset="paris">
+          <strong>Neon Paris</strong>
+          <span>Rainbow Eiffel Tower, luxury car, glam dress, neon storefronts, wet street reflections, editorial heat.</span>
+        </button>
+
+        <button class="preset" type="button" data-preset="blend">
+          <strong>Custom Blend</strong>
+          <span>Mix the strongest parts of all the references into one original premium concept.</span>
+        </button>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="optionsTitle">
+      <div class="section-head">
+        <div>
+          <h2 id="optionsTitle">Prompt Options</h2>
+          <p class="copy">This version adds stronger scene matching, specific statement outfits, and intentional typography so the output feels closer to your examples instead of generic.</p>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="field">
+          <label for="referenceMode">Reference Match Mode</label>
+          <select id="referenceMode" data-field>
+            <option value="">Select match mode</option>
+            <option>Beach Paint-by-Number Fantasy</option>
+            <option>Midnight Neon Waterfront</option>
+            <option>Neon Paris Editorial</option>
+            <option>Custom Blend of Uploaded References</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="artStyle">Art Style</label>
+          <select id="artStyle" data-field>
+            <option value="">Select art style</option>
+            <option>Hyperrealistic</option>
+            <option>Fashion Editorial</option>
+            <option>Digital Painting</option>
+            <option>Glossy 3D</option>
+            <option>Storybook</option>
+            <option>Anime</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="world">World</label>
+          <select id="world" data-field>
+            <option value="">Select world</option>
+            <option>Midnight Neon</option>
+            <option>Color World</option>
+            <option>Neon Paris</option>
+            <option>Rainbow Art District</option>
+            <option>Paint-by-Number World</option>
+            <option>Creative Studio</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="visualDensity">Visual Density</label>
+          <select id="visualDensity" data-field>
+            <option value="">Select visual density</option>
+            <option>Clean Premium</option>
+            <option>Rich Layered</option>
+            <option>Maximal Editorial</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="hair">Hair</label>
+          <select id="hair" data-field>
+            <option value="">Select hairstyle</option>
+            <option>Long Waves</option>
+            <option>Braids</option>
+            <option>Locs</option>
+            <option>Afro</option>
+            <option>Ponytail</option>
+            <option>Curly Bob</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="hairColor">Hair Color</label>
+          <select id="hairColor" data-field>
+            <option value="">Select hair color</option>
+            <option>Black</option>
+            <option>Blonde</option>
+            <option>Rainbow Ombre</option>
+            <option>Neon Blue</option>
+            <option>Neon Pink</option>
+            <option>Purple</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="outfit">Outfit</label>
+          <select id="outfit" data-field>
+            <option value="">Select outfit</option>
+            <option>Paint-by-Number Bodycon Dress</option>
+            <option>Paint-by-Number Jumpsuit</option>
+            <option>Paint-by-Number Two-Piece Set</option>
+            <option>Neon-Trimmed Black Tracksuit</option>
+            <option>Rainbow Satin Glam Gown</option>
+            <option>Luxury Paint-Splatter Streetwear</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="mainProp">Main Prop</label>
+          <select id="mainProp" data-field>
+            <option value="">Select main prop</option>
+            <option>Giant Crayons</option>
+            <option>Giant Colored Pencils</option>
+            <option>Giant Paint Brushes</option>
+            <option>Giant Markers</option>
+            <option>Paint Buckets</option>
+            <option>Sketchbook</option>
+            <option>Easel</option>
+          </select>
+        </div>
+
+        <div class="field full">
+          <label for="scene">Scene</label>
+          <select id="scene" data-field>
+            <option value="">Select scene</option>
+            <option>Walking through a glowing rainbow street</option>
+            <option>Standing beside a giant crayon storefront</option>
+            <option>Sitting on an oversized paintbrush</option>
+            <option>Posing beside a rainbow sports car</option>
+            <option>Painting a colorful mural</option>
+            <option>Walking through a neon creative district</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="lighting">Lighting</label>
+          <select id="lighting" data-field>
+            <option value="">Select lighting</option>
+            <option>Midnight Neon Glow</option>
+            <option>Rainbow Lighting</option>
+            <option>Editorial Lighting</option>
+            <option>Golden Hour</option>
+            <option>Studio Glow</option>
+            <option>Dreamy Pastel</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="camera">Camera</label>
+          <select id="camera" data-field>
+            <option value="">Select camera composition</option>
+            <option>Full Body</option>
+            <option>Three Quarter</option>
+            <option>Portrait</option>
+            <option>Wide Shot</option>
+          </select>
+        </div>
+
+        <div class="field full">
+          <label for="customScene">Custom Scene Details</label>
+          <textarea id="customScene" data-field placeholder="Add environment layers, pose notes, background details, signage mood, storefront details, wet pavement, ocean, skyline, Eiffel Tower, murals, props, or anything else..."></textarea>
+        </div>
+
+        <div class="field full">
+          <label for="extraDetails">Extra Details</label>
+          <textarea id="extraDetails" data-field placeholder="Add makeup, jewelry, exact outfit notes, facial expression, shoe style, pose attitude, reflections, color gradients, or other details..."></textarea>
+        </div>
+      </div>
+    </section>
+
+
+    <section class="section" aria-labelledby="typographyTitle">
+      <div class="section-head">
+        <div>
+          <h2 id="typographyTitle">Typography</h2>
+          <p class="copy">Add the bold signs, neon phrases, painted lettering, and editorial text that make the reference images feel complete.</p>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="field">
+          <label for="typographyStyle">Typography Style</label>
+          <select id="typographyStyle" data-field>
+            <option value="">Select typography style</option>
+            <option>Paint-by-Number Lettering</option>
+            <option>Neon Script Signage</option>
+            <option>Bold 3D Storefront Letters</option>
+            <option>Hand-Painted Rainbow Lettering</option>
+            <option>Luxury Editorial Serif and Script</option>
+            <option>Glowing Marquee Typography</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="typographyPlacement">Typography Placement</label>
+          <select id="typographyPlacement" data-field>
+            <option value="">Select typography placement</option>
+            <option>Large Billboard Above the Subject</option>
+            <option>Storefront Sign Behind the Subject</option>
+            <option>Painted Mural in the Background</option>
+            <option>Neon Ground Reflection Near the Subject</option>
+            <option>Product Packaging and Creative Props</option>
+            <option>Top and Bottom Editorial Layout</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="mainText">Main Typography Text</label>
+          <input id="mainText" type="text" data-field placeholder="Example: MIDNIGHT NEON" />
+        </div>
+
+        <div class="field">
+          <label for="supportingText">Supporting Typography Text</label>
+          <input id="supportingText" type="text" data-field placeholder="Example: EVERY COLOR TELLS A STORY" />
+        </div>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="outputTitle">
+      <div class="section-head">
+        <div>
+          <h2 id="outputTitle">Prompt Output</h2>
+          <p class="copy">This output is built to push the AI toward reference-matched scenes instead of basic generic prompts.</p>
+        </div>
+      </div>
+
+      <textarea id="promptOutput" class="output" readonly aria-label="Generated prompt"></textarea>
+
+      <div class="meta">
+        <span id="count">0 characters</span>
+        <span class="status" id="status" aria-live="polite"></span>
+      </div>
+
+      <div class="tips">
+        <article class="tip">
+          <h3>Why this version hits harder</h3>
+          <p>It now tells the AI to study subject placement, scene density, prop styling, statement outfits, typography, glossy finish, neon/rainbow treatment, and the exact atmosphere from the uploaded references.</p>
+        </article>
+        <article class="tip">
+          <h3>Copyright-safe direction</h3>
+          <p>It recreates the same visual language and overall vibe while telling the AI to avoid real logos, trademarks, and protected artwork. That’s the sweet spot.</p>
+        </article>
+      </div>
+    </section>
+
+    <p class="foot">Built for stronger reference matching, original scene creation, and luxury rainbow editorial visuals.</p>
+  </main>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const fields = {
+        referenceMode: document.getElementById("referenceMode"),
+        artStyle: document.getElementById("artStyle"),
+        world: document.getElementById("world"),
+        visualDensity: document.getElementById("visualDensity"),
+        hair: document.getElementById("hair"),
+        hairColor: document.getElementById("hairColor"),
+        outfit: document.getElementById("outfit"),
+        mainProp: document.getElementById("mainProp"),
+        scene: document.getElementById("scene"),
+        lighting: document.getElementById("lighting"),
+        camera: document.getElementById("camera"),
+        typographyStyle: document.getElementById("typographyStyle"),
+        typographyPlacement: document.getElementById("typographyPlacement"),
+        mainText: document.getElementById("mainText"),
+        supportingText: document.getElementById("supportingText"),
+        customScene: document.getElementById("customScene"),
+        extraDetails: document.getElementById("extraDetails")
+      };
+
+      const randomizeBtn = document.getElementById("randomizeBtn");
+      const copyBtn = document.getElementById("copyBtn");
+      const clearBtn = document.getElementById("clearBtn");
+      const promptOutput = document.getElementById("promptOutput");
+      const countEl = document.getElementById("count");
+      const statusEl = document.getElementById("status");
+      const referenceFiles = document.getElementById("referenceFiles");
+      const fileStatus = document.getElementById("fileStatus");
+      const previewGrid = document.getElementById("previewGrid");
+      const presetButtons = document.querySelectorAll(".preset");
+
+      let statusTimer;
+
+      const identityOpening = "Use the uploaded reference photo as the exact identity reference. Preserve the person's recognizable facial features, skin tone, age, body proportions, and natural likeness. Do not slim, reshape, beautify beyond recognition, or change the person's identity or body type.";
+      const referenceDirection = "Study the uploaded reference images closely and recreate their exact visual language: match the overall scene structure, subject placement, camera feel, outfit energy, prop density, color intensity, glossy finish, layering, lighting mood, and immersive storytelling. Recreate the same overall feel while generating an original scene. Do not copy real logos, trademarks, protected characters, or copyrighted artwork.";
+      const coreLook = "The final image should consistently deliver vibrant rainbow colors, rich neon lighting, oversized creative supplies, immersive environments, luxury fashion, glossy reflections, premium editorial composition, colorful storefronts, and cinematic quality.";
+      const ending = "Create a premium 9:16 vertical image with rich realistic detail, vibrant colors, clean anatomy, natural hands, immersive storytelling, glossy reflections where appropriate, crisp focus, professional commercial-quality rendering, and a polished editorial finish.";
+
+      const modeMap = {
+        "Beach Paint-by-Number Fantasy":
+          "Build an original beachside paint-by-number fantasy world with a bright artistic sunset mood, layered creative supplies around the frame, a colorful illustrated backdrop, numbered design details, oceanfront atmosphere, and a playful but polished luxury finish.",
+        "Midnight Neon Waterfront":
+          "Build an original midnight neon waterfront world with a glowing skyline, reflective pavement or wet ground, luminous signage, oversized creative supplies, dark glossy fashion, and dramatic city-night energy.",
+        "Neon Paris Editorial":
+          "Build an original neon Paris editorial world with a rainbow-lit Eiffel Tower feeling, luxury street glamour, a premium sports car moment, dramatic storefront lighting, reflective pavement, and bold high-fashion energy.",
+        "Custom Blend of Uploaded References":
+          "Blend the strongest visual traits from the uploaded references into one cohesive original scene, mixing the best atmosphere, styling, prop scale, composition, and cinematic energy into a premium finished concept."
+      };
+
+      const densityMap = {
+        "Clean Premium": "Keep the scene polished and elevated with controlled visual layering, clear subject separation, and only high-impact props.",
+        "Rich Layered": "Use a richly layered environment with multiple supporting props, strong foreground and background detail, and a full premium world-building effect.",
+        "Maximal Editorial": "Push the scene into a bold maximal editorial direction with dense, immersive styling, multiple large props, dramatic signage, rich color saturation, and eye-catching visual abundance."
+      };
+
+      const outfitMap = {
+        "Paint-by-Number Bodycon Dress":
+          "Dress the subject in a fitted paint-by-number bodycon dress made from clean white illustrated fabric covered with black numbered outlines, large floral or scenic shapes, and selectively filled rainbow color sections. Make the print clearly readable as part of the actual garment, with realistic fabric folds, polished tailoring, and a bold luxury finish.",
+        "Paint-by-Number Jumpsuit":
+          "Dress the subject in a tailored paint-by-number jumpsuit featuring white numbered illustration panels, black contour lines, oversized floral and art-inspired shapes, and partially colored rainbow sections. Keep the garment fitted, fashionable, dimensional, and professionally constructed.",
+        "Paint-by-Number Two-Piece Set":
+          "Dress the subject in a coordinated paint-by-number two-piece set with a fitted top and matching skirt or pants. Use crisp numbered outlines, large floral artwork, blank white sections, and selectively painted rainbow areas that wrap naturally around the fabric.",
+        "Neon-Trimmed Black Tracksuit":
+          "Dress the subject in a glossy black luxury tracksuit with vivid rainbow-neon piping, subtle paint-splatter accents, a fitted waist, coordinated statement sneakers, and a polished nighttime editorial finish.",
+        "Rainbow Satin Glam Gown":
+          "Dress the subject in a body-skimming rainbow satin glam gown with rich jewel-tone gradients, elegant ruching, a dramatic thigh slit, glossy dimensional fabric, coordinated heels, and a high-fashion evening editorial finish.",
+        "Luxury Paint-Splatter Streetwear":
+          "Dress the subject in elevated luxury streetwear featuring clean tailoring, bold rainbow paint-splatter details, glossy accents, coordinated art-inspired sneakers, and a polished fashion-editorial silhouette."
+      };
+
+      function clean(value) {
+        return String(value || "").trim().replace(/\s+/g, " ");
+      }
+
+      function sentence(text) {
+        const t = clean(text);
+        return t ? (/[.!?]$/.test(t) ? t : t + ".") : "";
+      }
+
+      function lowercaseStart(text) {
+        if (!text) return "";
+        return text.charAt(0).toLowerCase() + text.slice(1);
+      }
+
+      function updateCount() {
+        const total = promptOutput.value.length;
+        countEl.textContent = `${total.toLocaleString()} characters`;
+      }
+
+      function showStatus(message, error = false) {
+        clearTimeout(statusTimer);
+        statusEl.textContent = message;
+        statusEl.style.color = error ? "var(--danger)" : "var(--success)";
+        statusTimer = setTimeout(() => {
+          statusEl.textContent = "";
+        }, 2600);
+      }
+
+      function buildPrompt() {
+        const referenceMode = clean(fields.referenceMode.value);
+        const artStyle = clean(fields.artStyle.value);
+        const world = clean(fields.world.value);
+        const visualDensity = clean(fields.visualDensity.value);
+        const hair = clean(fields.hair.value);
+        const hairColor = clean(fields.hairColor.value);
+        const outfit = clean(fields.outfit.value);
+        const mainProp = clean(fields.mainProp.value);
+        const scene = clean(fields.scene.value);
+        const lighting = clean(fields.lighting.value);
+        const camera = clean(fields.camera.value);
+        const typographyStyle = clean(fields.typographyStyle.value);
+        const typographyPlacement = clean(fields.typographyPlacement.value);
+        const mainText = clean(fields.mainText.value);
+        const supportingText = clean(fields.supportingText.value);
+        const customScene = clean(fields.customScene.value);
+        const extraDetails = clean(fields.extraDetails.value);
+
+        const parts = [identityOpening, referenceDirection];
+
+        if (referenceMode && modeMap[referenceMode]) {
+          parts.push(modeMap[referenceMode]);
+        }
+
+        if (artStyle || world) {
+          let line = "Create";
+          if (artStyle) {
+            const article = /^[aeiou]/i.test(artStyle) ? "an" : "a";
+            line += ` ${article} ${artStyle.toLowerCase()} image`;
+          } else {
+            line += " a premium image";
+          }
+
+          if (world) {
+            line += ` set inside an original ${world} environment`;
+          }
+
+          line += ", with a cohesive visual identity, dimensional materials, polished styling, and cinematic storytelling.";
+          parts.push(line);
+        }
+
+        if (hair || hairColor) {
+          let line = "Style the subject's hair";
+          if (hair) {
+            line += ` in ${hair.toLowerCase()}`;
+          }
+          if (hairColor) {
+            line += ` with a ${hairColor.toLowerCase()} color treatment`;
+          }
+          line += ", keeping the hair realistic, intentional, detailed, and naturally integrated with the subject.";
+          parts.push(line);
+        }
+
+        if (outfit) {
+          parts.push(
+            outfitMap[outfit] ||
+            `Dress the subject in a ${outfit.toLowerCase()} look that feels luxurious, coordinated, expressive, and professionally styled for the scene.`
+          );
+        }
+
+        if (scene) {
+          parts.push(`Show the subject ${lowercaseStart(scene)}, with strong subject separation, believable scale, and an image composition that feels intentionally designed rather than generic.`);
+        }
+
+        if (mainProp) {
+          parts.push(`Feature ${mainProp.toLowerCase()} as a clearly visible hero prop, naturally placed in the composition and scaled for dramatic visual impact.`);
+        }
+
+        if (lighting || camera) {
+          let line = "";
+          if (lighting) {
+            line += `Use ${lighting.toLowerCase()}`;
+          }
+          if (camera) {
+            line += lighting ? ` with a ${camera.toLowerCase()} composition` : `Use a ${camera.toLowerCase()} composition`;
+          }
+          line += ", keeping the subject, outfit, hero props, and environment balanced, readable, and visually premium.";
+          parts.push(line);
+        }
+
+        if (visualDensity && densityMap[visualDensity]) {
+          parts.push(densityMap[visualDensity]);
+        }
+
+        if (typographyStyle || typographyPlacement || mainText || supportingText) {
+          let line = "Add intentional, clearly legible typography";
+          if (typographyStyle) {
+            line += ` in a ${typographyStyle.toLowerCase()} style`;
+          }
+          if (typographyPlacement) {
+            line += ` using a ${typographyPlacement.toLowerCase()} placement`;
+          }
+          line += ".";
+
+          if (mainText) {
+            line += ` Render the exact main wording "${mainText}".`;
+          }
+
+          if (supportingText) {
+            line += ` Render the exact supporting wording "${supportingText}".`;
+          }
+
+          line += " Spell every word correctly, keep the lettering crisp and readable, integrate it naturally into the environment, and do not add unrelated wording, fake brands, gibberish, or extra text.";
+          parts.push(line);
+        }
+
+
+        if (customScene) {
+          parts.push(sentence(`Custom scene details: ${customScene}`));
+        }
+
+        if (extraDetails) {
+          parts.push(sentence(`Extra details: ${extraDetails}`));
+        }
+
+        parts.push(coreLook);
+        parts.push(ending);
+
+        const finalPrompt = parts.filter(Boolean).join(" ");
+        promptOutput.value = finalPrompt;
+        updateCount();
+        return finalPrompt;
+      }
+
+      function randomizeSelect(select) {
+        const valid = Array.from(select.options).filter(option => option.value !== "");
+        if (!valid.length) return;
+        const choice = valid[Math.floor(Math.random() * valid.length)];
+        select.value = choice.value;
+      }
+
+      function randomizeAll() {
+        Object.values(fields).forEach(field => {
+          if (field.tagName === "SELECT") randomizeSelect(field);
+        });
+        buildPrompt();
+        showStatus("Every dropdown was randomized.");
+      }
+
+      async function copyPrompt() {
+        const prompt = buildPrompt();
+        try {
+          await navigator.clipboard.writeText(prompt);
+          showStatus("Prompt copied to clipboard.");
+        } catch (err) {
+          promptOutput.removeAttribute("readonly");
+          promptOutput.select();
+          promptOutput.setSelectionRange(0, promptOutput.value.length);
+          const ok = document.execCommand("copy");
+          promptOutput.setAttribute("readonly", "");
+          showStatus(ok ? "Prompt copied to clipboard." : "Copy failed. Copy it manually.", !ok);
+        }
+      }
+
+      function clearAll() {
+        Object.values(fields).forEach(field => field.value = "");
+        referenceFiles.value = "";
+        previewGrid.innerHTML = "";
+        previewGrid.classList.remove("show");
+        fileStatus.textContent = "No images selected";
+        promptOutput.value = "";
+        updateCount();
+        showStatus("Everything was cleared.");
+      }
+
+      function renderPreviews(files) {
+        previewGrid.innerHTML = "";
+        const slice = Array.from(files).slice(0, 3);
+
+        slice.forEach(file => {
+          if (!/^image\/(png|jpeg|webp)$/.test(file.type)) return;
+          const img = document.createElement("img");
+          img.alt = file.name;
+          const reader = new FileReader();
+          reader.onload = e => {
+            img.src = e.target.result;
+          };
+          reader.readAsDataURL(file);
+          previewGrid.appendChild(img);
+        });
+
+        if (previewGrid.children.length) {
+          previewGrid.classList.add("show");
+        } else {
+          previewGrid.classList.remove("show");
+        }
+      }
+
+      function handleFileChange(event) {
+        const files = Array.from(event.target.files || []);
+        if (!files.length) {
+          fileStatus.textContent = "No images selected";
+          previewGrid.innerHTML = "";
+          previewGrid.classList.remove("show");
+          return;
+        }
+
+        const valid = files.filter(file => /^image\/(png|jpeg|webp)$/.test(file.type)).slice(0, 3);
+        if (!valid.length) {
+          fileStatus.textContent = "Please select JPG, PNG, or WEBP images.";
+          previewGrid.innerHTML = "";
+          previewGrid.classList.remove("show");
+          showStatus("Unsupported file type.", true);
+          return;
+        }
+
+        fileStatus.textContent = valid.map(file => file.name).join(", ");
+        renderPreviews(valid);
+      }
+
+      function applyPreset(name) {
+        const presets = {
+          beach: {
+            referenceMode: "Beach Paint-by-Number Fantasy",
+            artStyle: "Hyperrealistic",
+            world: "Paint-by-Number World",
+            visualDensity: "Rich Layered",
+            hair: "Curly Bob",
+            hairColor: "Rainbow Ombre",
+            outfit: "Paint-by-Number Bodycon Dress",
+            mainProp: "Giant Crayons",
+            scene: "Standing beside a giant crayon storefront",
+            lighting: "Golden Hour",
+            camera: "Full Body",
+            typographyStyle: "Paint-by-Number Lettering",
+            typographyPlacement: "Large Billboard Above the Subject",
+            mainText: "COLOR YOUR WORLD",
+            supportingText: "EVERY COLOR TELLS A STORY",
+            customScene: "Layer the scene with art palettes, paint pots, oversized crayons, boxed creative supplies, beach sand, shoreline waves, and a colorful illustrated backdrop that feels like a giant paint-by-number world.",
+            extraDetails: "Keep the subject full-body and front-facing, with a confident glam pose, rich makeup, colorful accessories, and a playful luxury energy."
+          },
+          waterfront: {
+            referenceMode: "Midnight Neon Waterfront",
+            artStyle: "Fashion Editorial",
+            world: "Midnight Neon",
+            visualDensity: "Rich Layered",
+            hair: "Long Waves",
+            hairColor: "Purple",
+            outfit: "Neon-Trimmed Black Tracksuit",
+            mainProp: "Giant Markers",
+            scene: "Walking through a neon creative district",
+            lighting: "Midnight Neon Glow",
+            camera: "Full Body",
+            typographyStyle: "Neon Script Signage",
+            typographyPlacement: "Large Billboard Above the Subject",
+            mainText: "MIDNIGHT NEON",
+            supportingText: "COLOR YOUR WORLD",
+            customScene: "Use a skyline waterfront at night with reflective pavement, glowing signs, oversized crayon and marker displays, and scattered creative tools in the foreground for a premium urban night scene.",
+            extraDetails: "Style the subject in a glossy black outfit with rainbow accents, bold makeup, and a calm confident pose."
+          },
+          paris: {
+            referenceMode: "Neon Paris Editorial",
+            artStyle: "Fashion Editorial",
+            world: "Neon Paris",
+            visualDensity: "Maximal Editorial",
+            hair: "Braids",
+            hairColor: "Rainbow Ombre",
+            outfit: "Rainbow Satin Glam Gown",
+            mainProp: "Giant Crayons",
+            scene: "Posing beside a rainbow sports car",
+            lighting: "Midnight Neon Glow",
+            camera: "Full Body",
+            typographyStyle: "Neon Script Signage",
+            typographyPlacement: "Storefront Sign Behind the Subject",
+            mainText: "MIDNIGHT NEON",
+            supportingText: "LIFE IS BETTER IN COLOR",
+            customScene: "Create a dramatic Paris night street with a rainbow-lit Eiffel Tower feeling, a luxury sports car, glowing storefronts, reflective wet pavement, oversized crayon displays, and elegant streetlamps.",
+            extraDetails: "Use a body-hugging rainbow gown, full glam styling, bold confidence, statement accessories, and a high-end fashion-editorial vibe."
+          },
+          blend: {
+            referenceMode: "Custom Blend of Uploaded References",
+            artStyle: "Hyperrealistic",
+            world: "Color World",
+            visualDensity: "Maximal Editorial",
+            hair: "Long Waves",
+            hairColor: "Rainbow Ombre",
+            outfit: "Luxury Paint-Splatter Streetwear",
+            mainProp: "Giant Crayons",
+            scene: "Walking through a glowing rainbow street",
+            lighting: "Editorial Lighting",
+            camera: "Full Body",
+            typographyStyle: "Hand-Painted Rainbow Lettering",
+            typographyPlacement: "Painted Mural in the Background",
+            mainText: "CREATE IN COLOR",
+            supportingText: "EVERY COLOR TELLS A STORY",
+            customScene: "Blend neon city energy, colorful storefronts, layered art supplies, a luxury fashion attitude, and an immersive rainbow environment into one original scene with strong foreground and background storytelling.",
+            extraDetails: "Keep the image bold, glossy, premium, and highly detailed with a confident full-body pose and visual richness."
+          }
+        };
+
+        const selected = presets[name];
+        if (!selected) return;
+
+        Object.keys(selected).forEach(key => {
+          if (fields[key]) {
+            fields[key].value = selected[key];
+          }
+        });
+
+        buildPrompt();
+        showStatus("Preset applied.");
+      }
+
+      Object.values(fields).forEach(field => {
+        field.addEventListener(field.tagName === "SELECT" ? "change" : "input", buildPrompt);
+      });
+
+      presetButtons.forEach(button => {
+        button.addEventListener("click", () => applyPreset(button.dataset.preset));
+      });
+
+      randomizeBtn.addEventListener("click", randomizeAll);
+      copyBtn.addEventListener("click", copyPrompt);
+      clearBtn.addEventListener("click", clearAll);
+      referenceFiles.addEventListener("change", handleFileChange);
+
+      buildPrompt();
+    })();
+  </script>
+</body>
+</html>
